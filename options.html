@@ -52,6 +52,19 @@
       <p class="hint">Pick a suggestion or type any language name.</p>
     </section>
 
+    <section>
+      <label for="reply-lang">Write my replies in</label>
+      <div class="inline">
+        <input id="reply-lang" list="langs" autocomplete="off" spellcheck="false">
+        <select id="reply-tone" aria-label="Default tone" style="flex: 0 0 130px">
+          <option value="casual">Casual</option>
+          <option value="neutral">Neutral</option>
+          <option value="formal">Formal</option>
+        </select>
+      </div>
+      <p class="hint">You can name a regional variety, for example "Spanish (Spain)" or "Spanish (Mexico)". Casual uses informal address (tú), Formal uses formal address (usted).</p>
+    </section>
+
     <div class="actions">
       <button id="save" class="primary" type="button">Save</button>
       <button id="remove" type="button">Remove key</button>

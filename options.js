@@ -24,9 +24,11 @@ function setModels(models, selected) {
 }
 
 (async () => {
-  const s = await api.storage.local.get(["apiKey", "model", "targetLang"]);
+  const s = await api.storage.local.get(["apiKey", "model", "targetLang", "replyLang", "replyTone"]);
   key.value = s.apiKey ?? "";
   lang.value = s.targetLang ?? "English";
+  $("reply-lang").value = s.replyLang ?? "Spanish";
+  $("reply-tone").value = s.replyTone ?? "casual";
   setModels([], s.model ?? DEFAULT_MODEL);
 })();
 
@@ -49,6 +51,8 @@ $("save").addEventListener("click", async () => {
     apiKey: key.value.trim(),
     model: model.value || DEFAULT_MODEL,
     targetLang: lang.value.trim() || "English",
+    replyLang: $("reply-lang").value.trim() || "Spanish",
+    replyTone: $("reply-tone").value,
   });
   setStatus("Saved.", "ok");
 });

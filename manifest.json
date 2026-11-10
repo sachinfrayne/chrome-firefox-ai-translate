@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Translate (Gemini)",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Translate selected text or the whole page in place using Google Gemini and your own API key.",
   "icons": {
     "16": "icons/icon-16.png",
@@ -31,6 +31,14 @@
     "translate-selection": {
       "suggested_key": { "default": "Alt+T" },
       "description": "Translate the selected text"
+    },
+    "translate-block": {
+      "suggested_key": { "default": "Alt+B" },
+      "description": "Pick a block of text to translate"
+    },
+    "compose-reply": {
+      "suggested_key": { "default": "Alt+R" },
+      "description": "Write a reply and translate it"
     },
     "translate-page": {
       "suggested_key": { "default": "Alt+Shift+T" },
