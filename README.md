@@ -1,0 +1,61 @@
+# AI Translate (Gemini)
+
+A Chrome and Firefox extension that translates text right on the page using Google Gemini and your own API key. One folder works in both browsers, with no build step.
+
+## What it does
+
+- **Translate selection**: select text, then right-click and choose "Translate selection with Gemini", or press `Alt+T`. The translation appears in a small panel at the top right of the page, with a Copy button.
+- **Translate page**: right-click the page and choose "Translate this page with Gemini", press `Alt+Shift+T`, or use the toolbar button. Text is replaced in place, starting with what is on screen. Run it again to translate content that loaded later.
+- **Show original**: restores the page text.
+
+## Install
+
+### Chrome (also Edge, Brave)
+
+1. Open `chrome://extensions`.
+2. Turn on **Developer mode** (top right).
+3. Click **Load unpacked** and choose this folder.
+
+### Firefox
+
+1. Open `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on** and choose `manifest.json` in this folder.
+
+Firefox removes temporary add-ons when it restarts. Your saved key and settings survive because the extension has a fixed ID. A permanent install needs the extension signed by Mozilla (free, unlisted, through addons.mozilla.org), or Firefox Developer Edition with `xpinstall.signatures.required` set to `false`.
+
+## Set up
+
+The settings page opens on first install (later: toolbar button, then **Settings**).
+
+1. Paste your Gemini API key (get one at https://aistudio.google.com/apikey).
+2. Click **Test key and load models** to confirm it works and pick a model. The default is `gemini-flash-latest`.
+3. Choose the language to translate into, then **Save**.
+
+Shortcuts can be changed at `chrome://extensions/shortcuts` in Chrome, or in Firefox under Add-ons, gear icon, **Manage Extension Shortcuts**.
+
+## Where your API key goes
+
+- It is saved in the browser's local extension storage (`storage.local`), not synced storage, so it stays in this browser profile on this device.
+- It is read only by the background script, which sends it as the `x-goog-api-key` header to `generativelanguage.googleapis.com`. That is required for Gemini to accept the request. It is never put in a URL.
+- The manifest grants network access to that one host only, and the extension pages' content security policy limits connections to it as well.
+- The script that runs inside web pages never receives the key. It only passes text to the background script and gets translations back.
+- Like all extension data, the key sits unencrypted in your browser profile on disk. **Remove key** on the settings page deletes it.
+
+The text you translate is sent to Google's Gemini API. Nothing is sent until you trigger a translation, and the extension only touches a tab after you invoke it there.
+
+## Limits
+
+- Browser-internal pages (`chrome://`, `about:`, the extension stores) cannot be translated.
+- Page translation covers the top frame, not embedded iframes.
+- Text inside code blocks, form fields and editable areas is left alone.
+- Very long pages use many API requests. On a free-tier key you may hit rate limits, in which case the extension retries a few times and then reports the error.
+
+## Files
+
+| File | Purpose |
+| --- | --- |
+| `manifest.json` | Manifest V3, shared by Chrome and Firefox |
+| `background.js` | Gemini API client, context menus, shortcuts |
+| `content.js` | On-page panel and in-place page translation |
+| `popup.html`, `popup.js` | Toolbar popup |
+| `options.html`, `options.js` | Settings page and API key storage |

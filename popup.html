@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AI Translate</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    body { width: 280px; padding: 12px; }
+    .stack { display: grid; gap: 8px; }
+    .row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    #lang-wrap { margin-bottom: 12px; }
+    kbd { font: 11px ui-monospace, monospace; color: var(--muted); }
+    button.action { display: flex; justify-content: space-between; align-items: center; text-align: left; }
+    button.primary kbd { color: inherit; opacity: .8; }
+  </style>
+</head>
+<body>
+  <div id="lang-wrap">
+    <label for="lang">Translate into</label>
+    <input id="lang" list="langs" autocomplete="off" spellcheck="false">
+    <datalist id="langs"></datalist>
+  </div>
+  <div class="stack">
+    <button class="action primary" data-action="translate-page">Translate page <kbd>Alt+Shift+T</kbd></button>
+    <button class="action" data-action="translate-selection">Translate selection <kbd>Alt+T</kbd></button>
+    <button class="action" data-action="restore-page">Show original</button>
+  </div>
+  <p id="status" class="status err" role="alert"></p>
+  <div class="row">
+    <span id="key-state" class="hint"></span>
+    <button id="settings" class="link">Settings</button>
+  </div>
+  <script src="languages.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

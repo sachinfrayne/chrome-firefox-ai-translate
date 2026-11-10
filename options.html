@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Translate settings</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    main { max-width: 560px; margin: 0 auto; padding: 32px 16px 48px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    section { margin-top: 28px; }
+    .inline { display: flex; gap: 8px; }
+    .inline input, .inline select { flex: 1; min-width: 0; }
+    .inline button { white-space: nowrap; }
+    .actions { display: flex; gap: 8px; margin-top: 28px; align-items: center; flex-wrap: wrap; }
+    .note {
+      margin-top: 28px; padding: 12px 14px; border: 1px solid var(--line);
+      border-radius: 8px; color: var(--muted); font-size: 13px;
+    }
+    .note strong { color: var(--fg); }
+    .note ul { margin: 6px 0 0; padding-left: 18px; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>AI Translate settings</h1>
+    <p class="hint">Everything on this page is stored only in this browser profile on this device.</p>
+
+    <section>
+      <label for="key">Gemini API key</label>
+      <div class="inline">
+        <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your key">
+        <button id="toggle" type="button">Show</button>
+      </div>
+      <p class="hint">Get a key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a>.</p>
+    </section>
+
+    <section>
+      <label for="model">Model</label>
+      <div class="inline">
+        <select id="model"></select>
+        <button id="load-models" type="button">Test key and load models</button>
+      </div>
+      <p class="hint">Flash models are fast and cheap, which suits page translation. Pro models are slower.</p>
+    </section>
+
+    <section>
+      <label for="lang">Translate into</label>
+      <input id="lang" list="langs" autocomplete="off" spellcheck="false">
+      <datalist id="langs"></datalist>
+      <p class="hint">Pick a suggestion or type any language name.</p>
+    </section>
+
+    <div class="actions">
+      <button id="save" class="primary" type="button">Save</button>
+      <button id="remove" type="button">Remove key</button>
+      <p id="status" class="status" role="status"></p>
+    </div>
+
+    <div class="note">
+      <strong>Where your key goes</strong>
+      <ul>
+        <li>Saved in this browser's local extension storage. It is not synced to your Google or Firefox account.</li>
+        <li>Sent only to <code>generativelanguage.googleapis.com</code> (Google's Gemini API) as a request header, which is how the API authenticates you. The extension is not permitted to contact any other host.</li>
+        <li>Never exposed to the web pages you translate.</li>
+        <li>It is stored unencrypted in your browser profile, like all extension data, so anyone with access to your computer account could read it. "Remove key" deletes it.</li>
+      </ul>
+    </div>
+  </main>
+  <script src="languages.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
