@@ -80,7 +80,7 @@
         .body { padding: 12px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
         .body.err { color: var(--err); }
         .body.muted { color: var(--muted); }
-        footer { display: flex; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line); }
+        footer { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line); }
         footer:empty { display: none; }
         button {
           font: inherit; font-size: 12px; color: var(--accent); background: none;
@@ -112,6 +112,7 @@
 
   function closeUi() {
     stopPicking();
+    cancelVoice();
     host?.remove();
   }
 
@@ -316,6 +317,86 @@
     const anchor = sel?.rangeCount && sel.toString() ? sel.getRangeAt(0).getBoundingClientRect() : null;
     translateText(text, anchor);
   }
+
+  // ---- Voice messages ---------------------------------------------------------
+  // The background script injects a small helper into the page that waits for
+  // the next audio the page plays and posts its bytes back to us here.
+
+  let voiceNonce = null; // set while we are waiting for a voice message
+
+  function cancelVoice() {
+    if (!voiceNonce) return;
+    window.postMessage({ source: "ai-translate-voice", nonce: voiceNonce, cancel: true }, window.location.origin);
+    voiceNonce = null;
+  }
+
+  function startVoice(nonce) {
+    stopPicking();
+    cancelVoice();
+    voiceNonce = nonce;
+    show({
+      title: "AI Translate",
+      text: "Press play on the voice message you want transcribed.",
+      kind: "muted",
+      buttons: [["Cancel", closeUi]],
+    });
+  }
+
+  async function blobToBase64(blob) {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    return dataUrl.slice(dataUrl.indexOf(",") + 1);
+  }
+
+  window.addEventListener("message", async (e) => {
+    const d = e.data;
+    if (!voiceNonce || e.source !== window || d?.source !== "ai-translate-voice" || d.nonce !== voiceNonce || d.cancel) return;
+    voiceNonce = null;
+
+    let { data, mime } = d;
+    if (!d.ok && d.reason === "unreadable" && typeof d.src === "string") {
+      // The page's own rules blocked the helper from reading the audio; try from here.
+      try {
+        const blob = await (await fetch(d.src)).blob();
+        data = await blobToBase64(blob);
+        mime = blob.type;
+      } catch (_) {}
+    }
+    if (typeof data !== "string" || !data) {
+      const text = d.reason === "too-large"
+        ? "That recording is too long to transcribe."
+        : "Could not read that audio. This player may not be supported.";
+      show({ title: "AI Translate", text, kind: "err", buttons: [["Try another", retryVoice]] });
+      return;
+    }
+
+    show({ title: "AI Translate", text: "Transcribing…", kind: "muted" });
+    const res = await send({ type: "transcribe", data, mime });
+    if (!res.ok) return showError(res, null, [["Try another", retryVoice]]);
+    if (!res.transcript) {
+      show({ title: "Voice message", text: "No speech found in that audio.", kind: "muted", buttons: [["Try another", retryVoice]] });
+      return;
+    }
+    lastSource = res.transcript;
+    const translated = !!res.translation;
+    show({
+      title: translated ? `Voice message (${res.language} to ${res.targetLang})` : `Voice message (${res.language})`,
+      text: translated ? res.translation : res.transcript,
+      content: translated ? [make("div", { className: "meta", textContent: `Original: ${res.transcript}` })] : [],
+      buttons: [
+        ["Reply", () => startCompose()],
+        copyButton(translated ? res.translation : res.transcript),
+        ...(translated ? [["Copy original", copyButton(res.transcript)[1]]] : []),
+        ["Another", retryVoice],
+      ],
+    });
+  });
+
+  const retryVoice = () => send({ type: "retry-voice" });
 
   // ---- Block picker: hover to highlight a block, click to translate it ------
 
@@ -537,6 +618,7 @@
     if (msg?.type === "translate-selection") translateSelection(msg.text);
     else if (msg?.type === "translate-block") startPicking();
     else if (msg?.type === "compose-reply") startCompose();
+    else if (msg?.type === "transcribe-voice") startVoice(msg.nonce);
     else if (msg?.type === "translate-page") translatePage();
     else if (msg?.type === "restore-page") restorePage();
   });
