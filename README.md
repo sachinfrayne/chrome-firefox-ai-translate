@@ -62,3 +62,7 @@ The text you translate, the replies you draft and the voice messages you transcr
 | `content.js` | On-page panel and in-place page translation |
 | `popup.html`, `popup.js` | Toolbar popup |
 | `options.html`, `options.js` | Settings page and API key storage |
+
+## License
+
+Copyright 2026 Sachin Frayne. Licensed under the [Apache License, Version 2.0](LICENSE).
